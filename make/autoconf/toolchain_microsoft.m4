@@ -105,10 +105,12 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_VISUAL_STUDIO_ROOT],
         # for host x86-64, target aarch64
         VCVARSFILES="vc/auxiliary/build/vcvarsamd64_arm64.bat \
             vc/auxiliary/build/vcvarsx86_arm64.bat"
+      # winarm32 start - add arm awareness
       elif test "x$TARGET_CPU" = xarm; then
         # for host x86-64, target arm
         VCVARSFILES="vc/auxiliary/build/vcvarsamd64_arm.bat \
             vc/auxiliary/build/vcvarsx86_arm.bat"
+      # winarm32 end
       fi
 
       for VCVARSFILE in $VCVARSFILES; do
@@ -157,8 +159,10 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_WIN_SDK_ROOT],
           VS_ENV_ARGS="/x64"
         elif test "x$TARGET_CPU" = xaarch64; then
           VS_ENV_ARGS="/arm64"
+        # winarm32 start - add arm awareness
         elif test "x$TARGET_CPU" = xarm; then
           VS_ENV_ARGS="/arm"
+        # winarm32 end
         fi
         # PLATFORM_TOOLSET is used during the compilation of the freetype sources (see
         # 'LIB_BUILD_FREETYPE' in libraries.m4) and must be 'Windows7.1SDK' for Windows7.1SDK
@@ -465,6 +469,7 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVC_DLL],
       CORRECT_MSVCR_ARCH=386
     elif test "x$OPENJDK_TARGET_CPU" = xx86_64; then
       CORRECT_MSVCR_ARCH=x86-64
+    # winarm32 - add arm awareness
     elif test "x$OPENJDK_TARGET_CPU" = xaarch64 || test "x$OPENJDK_TARGET_CPU" = xarm; then
       # The cygwin 'file' command only returns "PE32+ executable (DLL) (console), for MS Windows",
       # without specifying which architecture it is for specifically. This has been fixed upstream.
@@ -494,8 +499,10 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVC_DLL],
     vs_target_cpu=x64
   elif test "x$OPENJDK_TARGET_CPU" = xaarch64; then
     vs_target_cpu=arm64
+  # winarm32 start - add arm awareness
   elif test "x$OPENJDK_TARGET_CPU" = xarm; then
     vs_target_cpu=arm
+  # winarm32 end
   fi
 
   if test "x$MSVC_DLL" = x; then
@@ -652,6 +659,7 @@ AC_DEFUN([TOOLCHAIN_SETUP_VS_RUNTIME_DLLS],
   AC_ARG_WITH(ucrt-dll-dir, [AS_HELP_STRING([--with-ucrt-dll-dir],
       [path to Microsoft Windows Kit UCRT DLL dir (Windows only) @<:@probed@:>@])])
 
+  # winarm32 - add arm awareness
   if test "x$USE_UCRT" = "xtrue" && test "x$OPENJDK_TARGET_CPU" != xaarch64 && test "x$OPENJDK_TARGET_CPU" != xarm; then
     AC_MSG_CHECKING([for UCRT DLL dir])
     if test "x$with_ucrt_dll_dir" != x; then
@@ -670,8 +678,10 @@ AC_DEFUN([TOOLCHAIN_SETUP_VS_RUNTIME_DLLS],
       dll_subdir=$OPENJDK_TARGET_CPU
       if test "x$dll_subdir" = "xaarch64"; then
         dll_subdir="arm64"
+      # winarm32 start - add arm awareness
       elif test "x$dll_subdir" = "xarm"; then
         dll_subdir="arm"
+      # winarm32 end
       elif test "x$dll_subdir" = "xx86_64"; then
         dll_subdir="x64"
       fi

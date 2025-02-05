@@ -31,7 +31,13 @@
 
 
 static int icache_flush(address addr, int lines, int magic) {
+// winarm32 start - windows arm support
+#ifdef _WIN32
+  FlushInstructionCache(GetCurrentProcess(), addr, addr + (lines << ICache::log2_line_size) - addr);
+#else
   __builtin___clear_cache(addr, addr + (lines << ICache::log2_line_size));
+#endif
+// winarm32 end
   return magic;
 }
 

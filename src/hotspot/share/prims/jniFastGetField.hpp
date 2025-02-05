@@ -71,7 +71,7 @@ class JNI_FastGetField : AllStatic {
 #endif // AARCH64
 
  public:
-#if defined(_WINDOWS) && !defined(_WIN64)
+#if (defined(_WINDOWS) && !defined(_WIN64)) || defined(_M_ARM) // winarm32 - add windows arm awareness
   static GetBooleanField_t jni_fast_GetBooleanField_fp;
   static GetByteField_t    jni_fast_GetByteField_fp;
   static GetCharField_t    jni_fast_GetCharField_fp;

@@ -162,7 +162,7 @@ OopMap* RegisterSaver::save_live_registers(MacroAssembler* masm,
   assert(j == R10->encoding(), "must be");
 #if (FP_REG_NUM != 11)
   // add R11, if not managed as FP
-  map->set_callee_saved(VMRegImpl::stack2reg(R11_offset), R11->as_VMReg());
+  map->set_callee_saved(VMRegImpl::stack2reg(R11_offset), ARM_R11->as_VMReg());
 #endif
   map->set_callee_saved(VMRegImpl::stack2reg(R12_offset), R12->as_VMReg());
   map->set_callee_saved(VMRegImpl::stack2reg(R14_offset), R14->as_VMReg());

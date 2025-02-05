@@ -527,7 +527,7 @@
 // Note: There are two ARM ports. They set the following in the makefiles:
 // 1. 32-bit port:   -DARM -DARM32 -DTARGET_ARCH_arm
 // 2. 64-bit port:   -DAARCH64 -D_LP64 -DTARGET_ARCH_aaarch64
-#ifdef ARM
+#if defined(ARM) || defined(_M_ARM) // winarm32 - add windows arm awareness
 #define ARM_ONLY(code) code
 #define NOT_ARM(code)
 #else
@@ -535,7 +535,7 @@
 #define NOT_ARM(code) code
 #endif
 
-#ifdef ARM32
+#if defined(ARM32) || defined(_M_ARM) // winarm32 - add windows arm awareness
 #define ARM32_ONLY(code) code
 #define NOT_ARM32(code)
 #else

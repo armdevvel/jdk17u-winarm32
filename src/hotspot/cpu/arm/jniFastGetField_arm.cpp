@@ -37,6 +37,19 @@
 
 #define BUFFER_SIZE 120
 
+// winarm32 start - windows arm support
+#ifdef _WINDOWS
+GetBooleanField_t JNI_FastGetField::jni_fast_GetBooleanField_fp;
+GetByteField_t    JNI_FastGetField::jni_fast_GetByteField_fp;
+GetCharField_t    JNI_FastGetField::jni_fast_GetCharField_fp;
+GetShortField_t   JNI_FastGetField::jni_fast_GetShortField_fp;
+GetIntField_t     JNI_FastGetField::jni_fast_GetIntField_fp;
+GetLongField_t    JNI_FastGetField::jni_fast_GetLongField_fp;
+GetFloatField_t   JNI_FastGetField::jni_fast_GetFloatField_fp;
+GetDoubleField_t  JNI_FastGetField::jni_fast_GetDoubleField_fp;
+#endif
+// winarm32 end
+
 address JNI_FastGetField::generate_fast_get_int_field0(BasicType type) {
   const char* name = NULL;
   address slow_case_addr = NULL;
@@ -215,7 +228,18 @@ address JNI_FastGetField::generate_fast_get_int_field0(BasicType type) {
 
   guarantee((__ pc() - fast_entry) <= BUFFER_SIZE, "BUFFER_SIZE too small");
 
+#ifndef _WINDOWS
   return fast_entry;
+#else
+  switch (type) {
+  case T_BOOLEAN: jni_fast_GetBooleanField_fp = (GetBooleanField_t) fast_entry; break;
+  case T_BYTE:    jni_fast_GetByteField_fp    = (GetByteField_t)    fast_entry; break;
+  case T_CHAR:    jni_fast_GetCharField_fp    = (GetCharField_t)    fast_entry; break;
+  case T_SHORT:   jni_fast_GetShortField_fp   = (GetShortField_t)   fast_entry; break;
+  case T_INT:     jni_fast_GetIntField_fp     = (GetIntField_t)     fast_entry; break;
+  }
+  return os::win32::fast_jni_accessor_wrapper(type);
+#endif
 }
 
 address JNI_FastGetField::generate_fast_get_float_field0(BasicType type) {

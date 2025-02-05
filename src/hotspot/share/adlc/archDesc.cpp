@@ -1137,8 +1137,10 @@ void ArchDesc::addPreprocessorChecks(FILE *fp) {
     if (def)
           fprintf(fp, "-D%s=%s\n", flag, def);
     else  fprintf(fp, "-U%s\n", flag);
-    fprintf(fp, "#%s %s\n",
-            def ? "ifndef" : "ifdef", flag);
+    // winarm32 start - add windows arm awareness
+    fprintf(fp, "#if %s %s%s\n",
+            def ? "!defined" : "defined", flag, strcmp(flag, "ARM") == 0 ? (def ? " && !defined _M_ARM" : " || defined _M_ARM") : "");
+    // winarm32 end
     fprintf(fp, "#  error \"%s %s be defined\"\n",
             flag, def ? "must" : "must not");
     fprintf(fp, "#endif // %s\n", flag);

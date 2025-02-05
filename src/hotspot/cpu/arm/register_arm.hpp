@@ -105,7 +105,8 @@ typedef VMRegImpl* VMReg;
 #define R8     ((Register)8)
 #define R9     ((Register)9)
 #define R10    ((Register)10)
-#define R11    ((Register)11)
+// winarm32 - change `R11` to `ARM_R11` to avoid conflict with winnt.h's CONTEXT member
+#define ARM_R11    ((Register)11)
 #define R12    ((Register)12)
 #define R13    ((Register)13)
 #define R14    ((Register)14)

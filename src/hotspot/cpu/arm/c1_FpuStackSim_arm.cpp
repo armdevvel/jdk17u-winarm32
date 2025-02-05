@@ -23,3 +23,6 @@
  */
 
 // Nothing needed here
+
+// winarm32 - required to include precompiled.hpp
+#include "precompiled.hpp"

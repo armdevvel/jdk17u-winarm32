@@ -469,7 +469,7 @@ enum {
 
 const int trace_mh_nregs = 15;
 const Register trace_mh_regs[trace_mh_nregs] =
-  {R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, LR, PC};
+  {R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, ARM_R11, R12, LR, PC};
 
 void trace_method_handle_stub(const char* adaptername,
                               intptr_t* saved_regs,

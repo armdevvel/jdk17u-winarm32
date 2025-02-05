@@ -243,7 +243,7 @@ void LIRItem::load_for_store(BasicType type) {
 void LIRItem::load_item_force(LIR_Opr reg) {
   LIR_Opr r = result();
   if (r != reg) {
-#if !defined(ARM) && !defined(E500V2)
+#if !defined(ARM) && !defined(_M_ARM) && !defined(E500V2) // winarm32 - add windows arm awareness
     if (r->type() != reg->type()) {
       // moves between different types need an intervening spill slot
       r = _gen->force_to_spill(r, reg->type());

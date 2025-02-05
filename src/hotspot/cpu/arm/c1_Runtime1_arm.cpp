@@ -171,7 +171,7 @@ static OopMap* generate_oop_map(StubAssembler* sasm, bool save_fpu_registers = H
   assert(j == R10->encoding(), "must be");
 #if (FP_REG_NUM != 11)
   // add R11, if not saved as FP
-  map->set_callee_saved(VMRegImpl::stack2reg(R11_offset), R11->as_VMReg());
+  map->set_callee_saved(VMRegImpl::stack2reg(R11_offset), ARM_R11->as_VMReg());
 #endif
   map->set_callee_saved(VMRegImpl::stack2reg(FP_offset), FP->as_VMReg());
   map->set_callee_saved(VMRegImpl::stack2reg(LR_offset), LR->as_VMReg());

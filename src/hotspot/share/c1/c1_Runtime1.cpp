@@ -1168,7 +1168,7 @@ JRT_ENTRY(void, Runtime1::patch_code(JavaThread* current, Runtime1::StubID stub_
         if (do_patch) {
           // replace instructions
           // first replace the tail, then the call
-#ifdef ARM
+#if defined(ARM) || defined(_M_ARM) // winarm32 - add windows arm awareness
           if((load_klass_or_mirror_patch_id ||
               stub_id == Runtime1::load_appendix_patching_id) &&
               nativeMovConstReg_at(copy_buff)->is_pc_relative()) {

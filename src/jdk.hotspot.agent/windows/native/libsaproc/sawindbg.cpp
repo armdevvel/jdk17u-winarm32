@@ -39,6 +39,9 @@
 #elif _M_ARM64
   #include "sun_jvm_hotspot_debugger_aarch64_AARCH64ThreadContext.h"
   #define NPRGREG sun_jvm_hotspot_debugger_aarch64_AARCH64ThreadContext_NPRGREG
+#elif _M_ARM // winarm32 - add windows arm awareness
+  #include "sun_jvm_hotspot_debugger_arm_ARMThreadContext.h"
+  #define NPRGREG sun_jvm_hotspot_debugger_arm_ARMThreadContext_NPRGREG
 #else
   #error "SA windbg back-end is not supported for your cpu!"
 #endif
