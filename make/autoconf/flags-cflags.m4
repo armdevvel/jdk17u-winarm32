@@ -698,6 +698,10 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_CPU_DEP],
   if test "x$TOOLCHAIN_TYPE" = xmicrosoft; then
     if test "x$FLAGS_CPU" = xaarch64; then
       $1_DEFINES_CPU_JDK="${$1_DEFINES_CPU_JDK} -D_ARM64_ -Darm64"
+    # winarm32 start - add arm awareness
+    elif test "x$FLAGS_CPU" = xarm; then
+      $1_DEFINES_CPU_JDK="${$1_DEFINES_CPU_JDK} -D_ARM_ -Darm"
+    # winarm32 end
     elif test "x$FLAGS_CPU" = xx86_64; then
       $1_DEFINES_CPU_JDK="${$1_DEFINES_CPU_JDK} -D_AMD64_ -Damd64"
     else
