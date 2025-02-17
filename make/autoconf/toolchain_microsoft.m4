@@ -469,12 +469,14 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVC_DLL],
       CORRECT_MSVCR_ARCH=386
     elif test "x$OPENJDK_TARGET_CPU" = xx86_64; then
       CORRECT_MSVCR_ARCH=x86-64
-    # winarm32 - add arm awareness
-    elif test "x$OPENJDK_TARGET_CPU" = xaarch64 || test "x$OPENJDK_TARGET_CPU" = xarm; then
+    elif test "x$OPENJDK_TARGET_CPU" = xaarch64; then
       # The cygwin 'file' command only returns "PE32+ executable (DLL) (console), for MS Windows",
       # without specifying which architecture it is for specifically. This has been fixed upstream.
       # https://github.com/file/file/commit/b849b1af098ddd530094bf779b58431395db2e10#diff-ff2eced09e6860de75057dd731d092aeR142
       CORRECT_MSVCR_ARCH="PE32+ executable"
+    # winarm32 - add arm awareness
+    elif test "x$OPENJDK_TARGET_CPU" = xarm; then
+      CORRECT_MSVCR_ARCH="PE32 executable (DLL) (console) ARMv7 Thumb"
     fi
     if $ECHO "$MSVC_DLL_FILETYPE" | $GREP "$CORRECT_MSVCR_ARCH" 2>&1 > /dev/null; then
       AC_MSG_RESULT([ok])
