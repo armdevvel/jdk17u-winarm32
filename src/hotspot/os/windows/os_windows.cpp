@@ -397,7 +397,7 @@ void os::init_system_properties_values() {
   #undef PACKAGE_DIR
 
 // winarm32 TODO: see if this works on arm
-#ifndef _WIN64
+#if !defined(_WIN64) && !defined(_M_ARM)
   // set our UnhandledExceptionFilter and save any previous one
   prev_uef_handler = SetUnhandledExceptionFilter(Handle_FLT_Exception);
 #endif
