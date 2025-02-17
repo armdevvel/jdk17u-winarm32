@@ -1609,12 +1609,12 @@ void * os::dll_load(const char *name, char *ebuf, int ebuflen) {
     {IMAGE_FILE_MACHINE_I386,      (char*)"IA 32"},
     {IMAGE_FILE_MACHINE_AMD64,     (char*)"AMD 64"},
     {IMAGE_FILE_MACHINE_ARM64,     (char*)"ARM 64"},
-    {IMAGE_FILE_MACHINE_ARM32,     (char*)"ARM 32"} // winarm32 - add arm awareness
+    {IMAGE_FILE_MACHINE_ARM,       (char*)"ARM 32"} // winarm32 - add arm awareness
   };
 #if (defined _M_ARM64)
   static const uint16_t running_arch = IMAGE_FILE_MACHINE_ARM64;
 #elif (defined _M_ARM) // winarm32 - add arm awareness
-  static const uint16_t running_arch = IMAGE_FILE_MACHINE_ARM32;
+  static const uint16_t running_arch = IMAGE_FILE_MACHINE_ARM;
 #elif (defined _M_AMD64)
   static const uint16_t running_arch = IMAGE_FILE_MACHINE_AMD64;
 #elif (defined _M_IX86)
