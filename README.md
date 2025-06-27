@@ -1,4 +1,7 @@
 # JDK 17 for Windows RT armv7
+
+Credits to @Moresteck for their work on this
+
 ## Prerequisites:
 - Visual Studio Community 2022 (English ONLY! Uninstall non-English language packs)
 - latest MSVC v143 2022 C++ build tools for ARM architecture, installed separately through Visual Studio Installer
