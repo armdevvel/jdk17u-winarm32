@@ -105,6 +105,12 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_VISUAL_STUDIO_ROOT],
         # for host x86-64, target aarch64
         VCVARSFILES="vc/auxiliary/build/vcvarsamd64_arm64.bat \
             vc/auxiliary/build/vcvarsx86_arm64.bat"
+      # winarm32 start - add arm awareness
+      elif test "x$TARGET_CPU" = xarm; then
+        # for host x86-64, target arm
+        VCVARSFILES="vc/auxiliary/build/vcvarsamd64_arm.bat \
+            vc/auxiliary/build/vcvarsx86_arm.bat"
+      # winarm32 end
       fi
 
       for VCVARSFILE in $VCVARSFILES; do
@@ -153,6 +159,10 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_WIN_SDK_ROOT],
           VS_ENV_ARGS="/x64"
         elif test "x$TARGET_CPU" = xaarch64; then
           VS_ENV_ARGS="/arm64"
+        # winarm32 start - add arm awareness
+        elif test "x$TARGET_CPU" = xarm; then
+          VS_ENV_ARGS="/arm"
+        # winarm32 end
         fi
         # PLATFORM_TOOLSET is used during the compilation of the freetype sources (see
         # 'LIB_BUILD_FREETYPE' in libraries.m4) and must be 'Windows7.1SDK' for Windows7.1SDK
@@ -464,6 +474,9 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_MSVC_DLL],
       # without specifying which architecture it is for specifically. This has been fixed upstream.
       # https://github.com/file/file/commit/b849b1af098ddd530094bf779b58431395db2e10#diff-ff2eced09e6860de75057dd731d092aeR142
       CORRECT_MSVCR_ARCH="PE32+ executable"
+    # winarm32 - add arm awareness
+    elif test "x$OPENJDK_TARGET_CPU" = xarm; then
+      CORRECT_MSVCR_ARCH="PE32 executable (DLL) (console) ARMv7 Thumb"
     fi
     if $ECHO "$MSVC_DLL_FILETYPE" | $GREP "$CORRECT_MSVCR_ARCH" 2>&1 > /dev/null; then
       AC_MSG_RESULT([ok])
@@ -488,6 +501,10 @@ AC_DEFUN([TOOLCHAIN_SETUP_MSVC_DLL],
     vs_target_cpu=x64
   elif test "x$OPENJDK_TARGET_CPU" = xaarch64; then
     vs_target_cpu=arm64
+  # winarm32 start - add arm awareness
+  elif test "x$OPENJDK_TARGET_CPU" = xarm; then
+    vs_target_cpu=arm
+  # winarm32 end
   fi
 
   if test "x$MSVC_DLL" = x; then
@@ -644,7 +661,8 @@ AC_DEFUN([TOOLCHAIN_SETUP_VS_RUNTIME_DLLS],
   AC_ARG_WITH(ucrt-dll-dir, [AS_HELP_STRING([--with-ucrt-dll-dir],
       [path to Microsoft Windows Kit UCRT DLL dir (Windows only) @<:@probed@:>@])])
 
-  if test "x$USE_UCRT" = "xtrue" && test "x$OPENJDK_TARGET_CPU" != xaarch64; then
+  # winarm32 - add arm awareness
+  if test "x$USE_UCRT" = "xtrue" && test "x$OPENJDK_TARGET_CPU" != xaarch64 && test "x$OPENJDK_TARGET_CPU" != xarm; then
     AC_MSG_CHECKING([for UCRT DLL dir])
     if test "x$with_ucrt_dll_dir" != x; then
       if test -z "$(ls -d "$with_ucrt_dll_dir/"*.dll 2> /dev/null)"; then
@@ -662,6 +680,10 @@ AC_DEFUN([TOOLCHAIN_SETUP_VS_RUNTIME_DLLS],
       dll_subdir=$OPENJDK_TARGET_CPU
       if test "x$dll_subdir" = "xaarch64"; then
         dll_subdir="arm64"
+      # winarm32 start - add arm awareness
+      elif test "x$dll_subdir" = "xarm"; then
+        dll_subdir="arm"
+      # winarm32 end
       elif test "x$dll_subdir" = "xx86_64"; then
         dll_subdir="x64"
       fi

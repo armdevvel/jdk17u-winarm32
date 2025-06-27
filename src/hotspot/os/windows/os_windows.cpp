@@ -122,6 +122,8 @@ static FILETIME process_kernel_time;
 
 #if defined(_M_ARM64)
   #define __CPU__ aarch64
+#elif defined(_M_ARM) // winarm32 - check for arm
+  #define __CPU__ arm
 #elif defined(_M_AMD64)
   #define __CPU__ amd64
 #else
@@ -394,7 +396,8 @@ void os::init_system_properties_values() {
   #undef BIN_DIR
   #undef PACKAGE_DIR
 
-#ifndef _WIN64
+// winarm32 TODO: see if this works on arm
+#if !defined(_WIN64) && !defined(_M_ARM)
   // set our UnhandledExceptionFilter and save any previous one
   prev_uef_handler = SetUnhandledExceptionFilter(Handle_FLT_Exception);
 #endif
@@ -1605,17 +1608,21 @@ void * os::dll_load(const char *name, char *ebuf, int ebuflen) {
   static const arch_t arch_array[] = {
     {IMAGE_FILE_MACHINE_I386,      (char*)"IA 32"},
     {IMAGE_FILE_MACHINE_AMD64,     (char*)"AMD 64"},
-    {IMAGE_FILE_MACHINE_ARM64,     (char*)"ARM 64"}
+    {IMAGE_FILE_MACHINE_ARM64,     (char*)"ARM 64"},
+    {IMAGE_FILE_MACHINE_ARM,       (char*)"ARM 32"} // winarm32 - add arm awareness
   };
 #if (defined _M_ARM64)
   static const uint16_t running_arch = IMAGE_FILE_MACHINE_ARM64;
+#elif (defined _M_ARM) // winarm32 - add arm awareness
+  static const uint16_t running_arch = IMAGE_FILE_MACHINE_ARM;
 #elif (defined _M_AMD64)
   static const uint16_t running_arch = IMAGE_FILE_MACHINE_AMD64;
 #elif (defined _M_IX86)
   static const uint16_t running_arch = IMAGE_FILE_MACHINE_I386;
 #else
+  // winarm32 - add _M_ARM mention
   #error Method os::dll_load requires that one of following \
-         is defined :_M_AMD64 or _M_IX86 or _M_ARM64
+         is defined :_M_AMD64 or _M_IX86 or _M_ARM64 or _M_ARM
 #endif
 
 
@@ -1819,9 +1826,10 @@ void os::win32::print_windows_version(outputStream* st) {
   }
   strncat(kernel32_path, "\\kernel32.dll", MAX_PATH - ret);
 
-  DWORD version_size = GetFileVersionInfoSize(kernel32_path, NULL);
+  // winarm32 TODO - GetFileVersionInfoSize -> GetFileVersionInfoSizeA
+  DWORD version_size = GetFileVersionInfoSizeA(kernel32_path, NULL);
   if (version_size == 0) {
-    st->print_cr("Call to GetFileVersionInfoSize failed");
+    st->print_cr("Call to GetFileVersionInfoSizeA failed");
     return;
   }
 
@@ -2377,7 +2385,7 @@ LONG Handle_Exception(struct _EXCEPTION_POINTERS* exceptionInfo,
                       address handler) {
   Thread* thread = Thread::current_or_null();
 
-#if defined(_M_ARM64)
+#if defined(_M_ARM64) || defined(_M_ARM) // winarm32 - add arm awareness
   #define PC_NAME Pc
 #elif defined(_M_AMD64)
   #define PC_NAME Rip
@@ -2487,6 +2495,10 @@ LONG Handle_IDiv_Exception(struct _EXCEPTION_POINTERS* exceptionInfo) {
   ctx->X4 = (uint64_t)min_jint;      // result
   ctx->X5 = (uint64_t)0;             // remainder
   // Continue the execution
+#elif defined(_M_ARM)
+
+// winarm32 TODO: implement
+
 #elif defined(_M_AMD64)
   PCONTEXT ctx = exceptionInfo->ContextRecord;
   address pc = (address)ctx->Rip;
@@ -2580,7 +2592,7 @@ LONG WINAPI topLevelExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo) {
   if (InterceptOSException) return EXCEPTION_CONTINUE_SEARCH;
   PEXCEPTION_RECORD exception_record = exceptionInfo->ExceptionRecord;
   DWORD exception_code = exception_record->ExceptionCode;
-#if defined(_M_ARM64)
+#if defined(_M_ARM64) || defined(_M_ARM) // winarm32 - add arm awareness
   address pc = (address) exceptionInfo->ContextRecord->Pc;
 #elif defined(_M_AMD64)
   address pc = (address) exceptionInfo->ContextRecord->Rip;
@@ -2792,7 +2804,7 @@ LONG WINAPI topLevelExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo) {
       }
     }
 
-#ifdef _M_ARM64
+#ifdef _M_ARM64 // winarm32 TODO: implement?
     if (in_java &&
         (exception_code == EXCEPTION_ILLEGAL_INSTRUCTION ||
           exception_code == EXCEPTION_ILLEGAL_INSTRUCTION_2)) {
@@ -2836,7 +2848,7 @@ LONG WINAPI topLevelExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo) {
 #if defined(USE_VECTORED_EXCEPTION_HANDLING)
 LONG WINAPI topLevelVectoredExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo) {
   PEXCEPTION_RECORD exceptionRecord = exceptionInfo->ExceptionRecord;
-#if defined(_M_ARM64)
+#if defined(_M_ARM64) || defined(_M_ARM) // winarm32 - add arm awareness
   address pc = (address) exceptionInfo->ContextRecord->Pc;
 #elif defined(_M_AMD64)
   address pc = (address) exceptionInfo->ContextRecord->Rip;
@@ -2864,7 +2876,7 @@ LONG WINAPI topLevelVectoredExceptionFilter(struct _EXCEPTION_POINTERS* exceptio
 LONG WINAPI topLevelUnhandledExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo) {
   if (InterceptOSException) goto exit;
   DWORD exception_code = exceptionInfo->ExceptionRecord->ExceptionCode;
-#if defined(_M_ARM64)
+#if defined(_M_ARM64) || defined(_M_ARM) // winarm32 - add arm awareness
   address pc = (address)exceptionInfo->ContextRecord->Pc;
 #elif defined(_M_AMD64)
   address pc = (address) exceptionInfo->ContextRecord->Rip;
@@ -2891,7 +2903,11 @@ exit:
 LONG WINAPI fastJNIAccessorExceptionFilter(struct _EXCEPTION_POINTERS* exceptionInfo) {
   DWORD exception_code = exceptionInfo->ExceptionRecord->ExceptionCode;
   if (exception_code == EXCEPTION_ACCESS_VIOLATION) {
+#ifdef _M_ARM
+    address pc = (address) exceptionInfo->ContextRecord->Pc;
+#else
     address pc = (address) exceptionInfo->ContextRecord->Eip;
+#endif
     address addr = JNI_FastGetField::find_slowcase_pc(pc);
     if (addr != (address)-1) {
       return Handle_Exception(exceptionInfo, addr);
@@ -5840,7 +5856,7 @@ int os::raw_send(int fd, char* buf, size_t nBytes, uint flags) {
 // WINDOWS CONTEXT Flags for THREAD_SAMPLING
 #if defined(IA32)
   #define sampling_context_flags (CONTEXT_FULL | CONTEXT_FLOATING_POINT | CONTEXT_EXTENDED_REGISTERS)
-#elif defined(AMD64) || defined(_M_ARM64)
+#elif defined(AMD64) || defined(_M_ARM64) || defined(_M_ARM) // winarm32 - add arm awareness
   #define sampling_context_flags (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
 #endif
 

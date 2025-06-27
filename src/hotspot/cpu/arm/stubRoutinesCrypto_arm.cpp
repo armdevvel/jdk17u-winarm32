@@ -22,6 +22,7 @@
  *
  */
 
+#include "precompiled.hpp"
 #ifdef COMPILE_CRYPTO
 
 // The Rijndael S-box and inverted S-box are embedded here for a faster access.
@@ -198,7 +199,7 @@ address generate_aescrypt_encryptBlock() {
   __ ldr(R12, Address(LR, 4, post_indexed));
   __ eor(R1, R1, AsmOperand(R3, ror, 16));
   __ eor(R12, R12, AsmOperand(R4, ror, 24));
-  __ eor(R11, R1, R12);
+  __ eor(ARM_R11, R1, R12);
 
   __ mov(R12, AsmOperand(R7, lsr, 24));
   __ ubfx(R4, R8, 16, 8);
@@ -233,7 +234,7 @@ address generate_aescrypt_encryptBlock() {
   __ subs(R9, R9, 4);
 
   __ mov(R5, R10);
-  __ mov(R6, R11);
+  __ mov(R6, ARM_R11);
   __ ldr(R7, Address(SP, 0));
 
   __ b(round, gt);
@@ -246,7 +247,7 @@ address generate_aescrypt_encryptBlock() {
   // output buffer pointer
   __ fmrs(R9, S7);
 
-  __ ldr(R11, Address(LR, 4, post_indexed));
+  __ ldr(ARM_R11, Address(LR, 4, post_indexed));
   __ ldrb(R0, Address(R10, R5, lsr, 24));
   __ ubfx(R12, R6, 16, 8);
   __ ldrb(R1, Address(R10, R12));
@@ -257,11 +258,11 @@ address generate_aescrypt_encryptBlock() {
   __ uxtb (R12, R8);
   __ ldrb(R3, Address(R10, R12));
   __ orr(R0, R3, AsmOperand(R0, lsl, 8));
-  __ eor(R0, R0, R11);
+  __ eor(R0, R0, ARM_R11);
   __ rev(R0, R0);
   __ str(R0, Address(R9, 4, post_indexed));
 
-  __ ldr(R11, Address(LR, 4, post_indexed));
+  __ ldr(ARM_R11, Address(LR, 4, post_indexed));
   __ ldrb(R0, Address(R10, R6, lsr, 24));
   __ ubfx(R12, R7, 16, 8);
   __ ldrb(R1, Address(R10, R12));
@@ -272,11 +273,11 @@ address generate_aescrypt_encryptBlock() {
   __ uxtb (R12, R5);
   __ ldrb(R3, Address(R10, R12));
   __ orr(R0, R3, AsmOperand(R0, lsl, 8));
-  __ eor(R0, R0, R11);
+  __ eor(R0, R0, ARM_R11);
   __ rev(R0, R0);
 
   __ str(R0, Address(R9, 4, post_indexed));
-  __ ldr(R11, Address(LR, 4, post_indexed));
+  __ ldr(ARM_R11, Address(LR, 4, post_indexed));
   __ ldrb(R0, Address(R10, R7, lsr, 24));
   __ ubfx(R12, R8, 16, 8);
   __ ldrb(R1, Address(R10, R12));
@@ -287,11 +288,11 @@ address generate_aescrypt_encryptBlock() {
   __ uxtb (R12, R6);
   __ ldrb(R3, Address(R10, R12));
   __ orr(R0, R3, AsmOperand(R0, lsl, 8));
-  __ eor(R0, R0, R11);
+  __ eor(R0, R0, ARM_R11);
   __ rev(R0, R0);
 
   __ str(R0, Address(R9, 4, post_indexed));
-  __ ldr(R11, Address(LR));
+  __ ldr(ARM_R11, Address(LR));
   __ ldrb(R0, Address(R10, R8, lsr, 24));
   __ ubfx(R12, R5, 16, 8);
   __ ldrb(R1, Address(R10, R12));
@@ -302,7 +303,7 @@ address generate_aescrypt_encryptBlock() {
   __ uxtb (R12, R7);
   __ ldrb(R3, Address(R10, R12));
   __ orr(R0, R3, AsmOperand(R0, lsl, 8));
-  __ eor(R0, R0, R11);
+  __ eor(R0, R0, ARM_R11);
   __ rev(R0, R0);
 
   __ str(R0, Address(R9));
@@ -404,7 +405,7 @@ address generate_aescrypt_decryptBlock() {
   __ ldr(R12, Address(LR, 4, post_indexed));
   __ eor(R1, R1, AsmOperand(R3, ror, 16));
   __ eor(R12, R12, AsmOperand(R4, ror, 24));
-  __ eor(R11, R1, R12);
+  __ eor(ARM_R11, R1, R12);
 
   __ mov(R12, AsmOperand(R7, lsr, 24));
   __ ubfx(R4, R6, 16, 8);
@@ -439,7 +440,7 @@ address generate_aescrypt_decryptBlock() {
   __ subs(R9, R9, 4);
 
   __ mov(R5, R10);
-  __ mov(R6, R11);
+  __ mov(R6, ARM_R11);
   __ ldr(R7, Address(SP, 0));
 
   __ b(round, gt);
@@ -456,7 +457,7 @@ address generate_aescrypt_decryptBlock() {
 
   // process each sub-block in a similar manner:
   // 1. load a corresponding round key
-  __ ldr(R11, Address(LR, 4, post_indexed));
+  __ ldr(ARM_R11, Address(LR, 4, post_indexed));
   // 2. combine SubBytes and ShiftRows stages
   __ ldrb(R0, Address(R10, R5, lsr, 24));
   __ ubfx(R12, R8, 16, 8);
@@ -469,13 +470,13 @@ address generate_aescrypt_decryptBlock() {
   __ ldrb(R3, Address(R10, R12));
   __ orr(R3, R3, AsmOperand(R0, lsl, 8));
   // 3. AddRoundKey stage
-  __ eor(R0, R3, R11);
+  __ eor(R0, R3, ARM_R11);
   // 4. convert the result to LE representation
   __ rev(R0, R0);
   // 5. store in the output buffer
   __ str(R0, Address(R9, 4, post_indexed));
 
-  __ ldr(R11, Address(LR, 4, post_indexed));
+  __ ldr(ARM_R11, Address(LR, 4, post_indexed));
   __ ldrb(R0, Address(R10, R6, lsr, 24));
   __ ubfx(R12, R5, 16, 8);
   __ ldrb(R1, Address(R10, R12));
@@ -486,11 +487,11 @@ address generate_aescrypt_decryptBlock() {
   __ uxtb (R12, R7);
   __ ldrb(R3, Address(R10, R12));
   __ orr(R0, R3, AsmOperand(R0, lsl, 8));
-  __ eor(R0, R0, R11);
+  __ eor(R0, R0, ARM_R11);
   __ rev(R0, R0);
   __ str(R0, Address(R9, 4, post_indexed));
 
-  __ ldr(R11, Address(LR, 4, post_indexed));
+  __ ldr(ARM_R11, Address(LR, 4, post_indexed));
   __ ldrb(R0, Address(R10, R7, lsr, 24));
   __ ubfx(R12, R6, 16, 8);
   __ ldrb(R1, Address(R10, R12));
@@ -501,11 +502,11 @@ address generate_aescrypt_decryptBlock() {
   __ uxtb (R12, R8);
   __ ldrb(R3, Address(R10, R12));
   __ orr(R0, R3, AsmOperand(R0, lsl, 8));
-  __ eor(R0, R0, R11);
+  __ eor(R0, R0, ARM_R11);
   __ rev(R0, R0);
   __ str(R0, Address(R9, 4, post_indexed));
 
-  __ ldr(R11, Address(LR));
+  __ ldr(ARM_R11, Address(LR));
   __ ldrb(R0, Address(R10, R8, lsr, 24));
   __ ubfx(R12, R7, 16, 8);
   __ ldrb(R1, Address(R10, R12));
@@ -516,7 +517,7 @@ address generate_aescrypt_decryptBlock() {
   __ uxtb (R12, R5);
   __ ldrb(R3, Address(R10, R12));
   __ orr(R0, R3, AsmOperand(R0, lsl, 8));
-  __ eor(R0, R0, R11);
+  __ eor(R0, R0, ARM_R11);
   __ rev(R0, R0);
   __ str(R0, Address(R9));
 
@@ -562,7 +563,7 @@ address generate_cipherBlockChaining_encryptAESCrypt() {
 
   __ eor(R0, R0, R9);
   __ eor(R1, R1, R10);
-  __ eor(R7, R7, R11);
+  __ eor(R7, R7, ARM_R11);
   __ eor(R8, R8, R12);
   __ stmia(SP, RegisterSet(R0, R1) | RegisterSet(R7, R8));
 
@@ -657,7 +658,7 @@ address generate_cipherBlockChaining_decryptAESCrypt() {
   // perform IV addition and save the plaintext for good now
   __ eor(R0, R0, R9);
   __ eor(R1, R1, R10);
-  __ eor(R2, R2, R11);
+  __ eor(R2, R2, ARM_R11);
   __ eor(R3, R3, R12);
   __ stmia(R6, RegisterSet(R0, R3));
 
@@ -824,7 +825,7 @@ address generate_cipherBlockChaining_decryptAESCrypt() {
   __ ldr(R12, Address(LR, 4, post_indexed));
   __ eor(R1, R1, AsmOperand(R3, ror, 16));
   __ eor(R12, R12, AsmOperand(R4, ror, 24));
-  __ eor(R11, R1, R12);
+  __ eor(ARM_R11, R1, R12);
 
   __ mov(R12, AsmOperand(R7, lsr, 24));
   __ ubfx(R4, R6, 16, 8);
@@ -860,7 +861,7 @@ address generate_cipherBlockChaining_decryptAESCrypt() {
 
   //  load processed data
   __ mov(R5, R10);
-  __ mov(R6, R11);
+  __ mov(R6, ARM_R11);
   __ ldr(R7, Address(SP, 0));
 
   __ b(round, gt);
@@ -873,7 +874,7 @@ address generate_cipherBlockChaining_decryptAESCrypt() {
   __ ldr(LR, block_current_output_buffer);
 
   // cipher counter
-  __ ldr(R11, Address(SP, 12));
+  __ ldr(ARM_R11, Address(SP, 12));
 
   __ mov_slow(R10, (int)SInvBox);
   __ ldrb(R0, Address(R10, R5, lsr, 24));
@@ -928,7 +929,7 @@ address generate_cipherBlockChaining_decryptAESCrypt() {
 
 
   // preserve current scratch buffer pointer
-  __ cmp(R11, LR);
+  __ cmp(ARM_R11, LR);
   __ str(LR, block_current_output_buffer);
 
   // go to the next block processing

@@ -616,7 +616,7 @@ class LIR_OprFact: public AllStatic {
   // Platform dependant.
   static LIR_Opr double_fpu(int reg1, int reg2 = -1 /*fnoreg*/);
 
-#ifdef ARM32
+#if defined(ARM32) || defined(_M_ARM) // winarm32 - add windows arm awareness
   static LIR_Opr single_softfp(int reg) {
     return (LIR_Opr)(intptr_t)((reg  << LIR_OprDesc::reg1_shift) |
                                LIR_OprDesc::float_type           |

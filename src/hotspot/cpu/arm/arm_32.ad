@@ -430,23 +430,25 @@ OptoRegPair c2::return_value(int ideal_reg) {
 //       from the start of the call to the point where the return address
 //       will point.
 
+// winarm32 start - don't use words reserved in MSVC (changed far -> far1)
 int MachCallStaticJavaNode::ret_addr_offset() {
-  bool far = (_method == NULL) ? maybe_far_call(this) : !cache_reachable();
-  return ((far ? 3 : 1) + (_method_handle_invoke ? 1 : 0)) *
+  bool far1 = (_method == NULL) ? maybe_far_call(this) : !cache_reachable();
+  return ((far1 ? 3 : 1) + (_method_handle_invoke ? 1 : 0)) *
     NativeInstruction::instruction_size;
 }
 
 int MachCallDynamicJavaNode::ret_addr_offset() {
-  bool far = !cache_reachable();
+  bool far1 = !cache_reachable();
   // mov_oop is always 2 words
-  return (2 + (far ? 3 : 1)) * NativeInstruction::instruction_size;
+  return (2 + (far1 ? 3 : 1)) * NativeInstruction::instruction_size;
 }
 
 int MachCallRuntimeNode::ret_addr_offset() {
   // bl or movw; movt; blx
-  bool far = maybe_far_call(this);
-  return (far ? 3 : 1) * NativeInstruction::instruction_size;
+  bool far1 = maybe_far_call(this);
+  return (far1 ? 3 : 1) * NativeInstruction::instruction_size;
 }
+// winarm32 end
 
 int MachCallNativeNode::ret_addr_offset() {
   Unimplemented();

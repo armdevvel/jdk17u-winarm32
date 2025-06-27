@@ -34,10 +34,12 @@
 #include "runtime/vm_version.hpp"
 
 int  VM_Version::_stored_pc_adjustment = 4;
-int  VM_Version::_arm_arch             = 5;
+int  VM_Version::_arm_arch             = 7; // winarm32 - 5->7
 bool VM_Version::_is_initialized       = false;
 int VM_Version::_kuser_helper_version  = 0;
 
+// winarm32 - comment out assembly and assume things for now
+#ifndef _WIN32
 extern "C" {
   typedef int (*get_cpu_info_t)();
   typedef bool (*check_vfp_t)(double *d);
@@ -116,11 +118,11 @@ class VM_Version_StubGenerator: public StubCodeGenerator {
 
 #undef __
 
-
 extern "C" address check_vfp3_32_fault_instr;
 extern "C" address check_vfp_fault_instr;
 extern "C" address check_simd_fault_instr;
 extern "C" address check_mp_ext_fault_instr;
+#endif // _WIN32
 
 void VM_Version::early_initialize() {
 
@@ -128,15 +130,22 @@ void VM_Version::early_initialize() {
   // use proper dmb instruction
   get_os_cpu_info();
 
+// winarm32 start - declare cx8 as supported
+#ifndef _WIN32
   _kuser_helper_version = *(int*)KUSER_HELPER_VERSION_ADDR;
   // armv7 has the ldrexd instruction that can be used to implement cx8
   // armv5 with linux >= 3.1 can use kernel helper routine
   _supports_cx8 = (supports_ldrexd() || supports_kuser_cmpxchg64());
+#else
+  _supports_cx8 = true;
+#endif
+// winarm32 end
 }
 
 void VM_Version::initialize() {
   ResourceMark rm;
 
+#ifndef _WIN32 // winarm32 - comment out checks and assume things for now
   // Making this stub must be FIRST use of assembler
   const int stub_size = 128;
   BufferBlob* stub_blob = BufferBlob::create("get_cpu_info", stub_size);
@@ -190,6 +199,12 @@ void VM_Version::initialize() {
   if (check_mp_ext(&dummy_local_variable)) {
     _features |= mp_ext_m;
   }
+#else
+  _features |= vfp_m;
+  _features |= vfp3_32_m;
+  _features |= simd_m;
+  _features |= mp_ext_m;
+#endif // _WIN32
 
   if (UseAESIntrinsics && !FLAG_IS_DEFAULT(UseAESIntrinsics)) {
     warning("AES intrinsics are not available on this CPU");
@@ -270,12 +285,19 @@ void VM_Version::initialize() {
   }
 #endif
 
+#ifndef _WIN32
   // ARM doesn't have special instructions for these but ldrex/ldrexd
   // enable shorter instruction sequences that the ones based on cas.
   _supports_atomic_getset4 = supports_ldrex();
   _supports_atomic_getadd4 = supports_ldrex();
   _supports_atomic_getset8 = supports_ldrexd();
   _supports_atomic_getadd8 = supports_ldrexd();
+#else
+  _supports_atomic_getset4 = true;
+  _supports_atomic_getadd4 = true;
+  _supports_atomic_getset8 = true;
+  _supports_atomic_getadd8 = true;
+#endif // _WIN32
 
 #ifdef COMPILER2
   assert(_supports_cx8 && _supports_atomic_getset4 && _supports_atomic_getadd4

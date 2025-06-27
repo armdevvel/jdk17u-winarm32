@@ -1094,7 +1094,7 @@ void MacroAssembler::debug(const char* msg, const intx* registers) {
     if (os::message_box(msg, "Execution stopped, print registers?")) {
       // saved registers: R0-R12, LR, PC
       const int nregs = 15;
-      const Register regs[nregs] = {R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, LR, PC};
+      const Register regs[nregs] = {R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, ARM_R11, R12, LR, PC};
 
       for (int i = 0; i < nregs; i++) {
         tty->print_cr("%s = " INTPTR_FORMAT, regs[i]->name(), registers[i]);

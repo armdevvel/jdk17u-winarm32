@@ -92,8 +92,8 @@ class VM_Version: public Abstract_VM_Version {
   static bool supports_movw()       { return _arm_arch >= 7; }
   static bool supports_ldrexd()     { return _arm_arch >= 7; }
   static bool supports_compare_and_exchange() { return true; }
-  static bool supports_kuser_cmpxchg32() { return _kuser_helper_version >= KUSER_VERSION_CMPXCHG32; }
-  static bool supports_kuser_cmpxchg64() { return _kuser_helper_version >= KUSER_VERSION_CMPXCHG64; }
+  static bool supports_kuser_cmpxchg32() { return true; } // winarm32 - cmpxchg32 is guaranteed
+  static bool supports_kuser_cmpxchg64() { return true; } // winarm32 - cmpxchg64 is guaranteed
   // Override Abstract_VM_Version implementation
   static bool use_biased_locking();
 

@@ -162,7 +162,8 @@ void NativeMovConstReg::set_data(intptr_t x, address pc) {
     unsigned int hi = (unsigned int)(x >> 16);
     this->set_encoding((this->encoding() & 0xfff0f000) | (lo & 0xf000) << 4 | (lo & 0xfff));
     next->set_encoding((next->encoding() & 0xfff0f000) | (hi & 0xf000) << 4 | (hi & 0xfff));
-  } else if (oop_addr == NULL & metadata_addr == NULL) {
+  // winarm32 - disambiguate the condition to satisfy MSVC
+  } else if ((oop_addr == NULL) & (metadata_addr == NULL)) {
     // A static ldr_literal (without oop or metadata relocation)
     assert(is_ldr_literal(), "must be");
     int offset = ldr_offset();

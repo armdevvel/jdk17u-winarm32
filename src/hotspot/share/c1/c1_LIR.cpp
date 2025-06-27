@@ -1585,7 +1585,7 @@ void LIR_OprDesc::print(outputStream* out) const {
     out->print("fpu%d", fpu_regnr());
   } else if (is_double_fpu()) {
     out->print("fpu%d", fpu_regnrLo());
-#elif defined(ARM)
+#elif defined(ARM) || defined(_M_ARM) // winarm32 - add windows arm awareness
   } else if (is_single_fpu()) {
     out->print("s%d", fpu_regnr());
   } else if (is_double_fpu()) {

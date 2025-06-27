@@ -1102,7 +1102,7 @@ size_t os::Posix::get_initial_stack_size(ThreadType thr_type, size_t req_stack_s
 }
 
 #ifndef ZERO
-#ifndef ARM
+#if !defined(ARM) && !defined(_M_ARM) // winarm32 - check windows arm
 static bool get_frame_at_stack_banging_point(JavaThread* thread, address pc, const void* ucVoid, frame* fr) {
   if (Interpreter::contains(pc)) {
     // interpreter performs stack banging after the fixed frame header has
@@ -1147,7 +1147,7 @@ bool os::Posix::handle_stack_overflow(JavaThread* thread, address addr, address 
   StackOverflow* overflow_state = thread->stack_overflow_state();
   if (overflow_state->in_stack_yellow_reserved_zone(addr)) {
     if (thread->thread_state() == _thread_in_Java) {
-#ifndef ARM
+#if !defined(ARM) && !defined(_M_ARM) // winarm32 - check windows arm
       // arm32 doesn't have this
       if (overflow_state->in_stack_reserved_zone(addr)) {
         frame fr;

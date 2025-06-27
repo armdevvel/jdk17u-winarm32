@@ -195,6 +195,11 @@ class Assembler : public AbstractAssembler  {
   static const int LogInstructionSize = 2;
   static const int InstructionSize    = 1 << LogInstructionSize;
 
+  // winarm32 - implement Assembler::locate_next_instruction
+  static address Assembler::locate_next_instruction(address inst) {
+    return inst + InstructionSize;
+  }
+
   //---<  calculate length of instruction  >---
   // We just use the values set above.
   // instruction must start at passed address

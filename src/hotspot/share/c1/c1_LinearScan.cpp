@@ -2799,7 +2799,7 @@ int LinearScan::append_scope_value_for_operand(LIR_Opr opr, GrowableArray<ScopeV
 #ifdef AMD64
       assert(false, "FPU not used on x86-64");
 #endif
-#ifdef ARM32
+#if defined(ARM32) || defined(_M_ARM) // winarm32 - add windows arm awareness
       assert(opr->fpu_regnrHi() == opr->fpu_regnrLo() + 1, "assumed in calculation (only fpu_regnrLo is used)");
 #endif
 #ifdef PPC32

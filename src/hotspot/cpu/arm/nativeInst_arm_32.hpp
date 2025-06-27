@@ -256,7 +256,8 @@ class RawNativeJump: public NativeInstruction {
   }
 
   void set_jump_destination(address dest) {
-    address a;
+    // winarm32 - remove unused variable
+    //address a;
     if (is_b()) {
       // Jump destination -1 is encoded as a jump to self
       if (dest == (address)-1) {
