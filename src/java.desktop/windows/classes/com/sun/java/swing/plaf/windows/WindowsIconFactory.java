@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2025, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,7 +28,6 @@ package com.sun.java.swing.plaf.windows;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -175,7 +174,7 @@ public class WindowsIconFactory implements Serializable
 
     @SuppressWarnings("serial") // Same-version serialization only
     private static class FrameButtonIcon implements Icon, Serializable {
-        private Part part;
+        private final Part part;
 
         private FrameButtonIcon(Part part) {
             this.part = part;
@@ -286,18 +285,10 @@ public class WindowsIconFactory implements Serializable
             int width;
             if (XPStyle.getXP() != null) {
                 // Fix for XP bug where sometimes these sizes aren't updated properly
-                // Assume for now that height is correct and derive width using the
-                // ratio from the uxtheme part
-                width = UIManager.getInt("InternalFrame.titleButtonHeight") -2;
-                Dimension d = XPStyle.getPartSize(Part.WP_CLOSEBUTTON, State.NORMAL);
-                if (d != null && d.width != 0 && d.height != 0) {
-                    width = (int) ((float) width * d.width / d.height);
-                }
+                // Assume for now that height is correct and derive width from height
+                width = UIManager.getInt("InternalFrame.titleButtonHeight") + 10;
             } else {
-                width = UIManager.getInt("InternalFrame.titleButtonWidth") -2;
-            }
-            if (XPStyle.getXP() != null) {
-                width -= 2;
+                width = UIManager.getInt("InternalFrame.titleButtonHeight") - 2;
             }
             return width;
         }
@@ -882,17 +873,60 @@ public class WindowsIconFactory implements Serializable
                         XPStyle xp = XPStyle.getXP();
                         if (xp != null) {
                             Skin skin = xp.getSkin(c, part);
-                            if (icon == null || icon.getIconHeight() <= 16) {
-                                skin.paintSkin(g, x + OFFSET, y + OFFSET, state);
+                            if (WindowsGraphicsUtils.isLeftToRight(c)) {
+                                if (icon == null || icon.getIconHeight() <= 16) {
+                                    skin.paintSkin(g, x + OFFSET, y + OFFSET, state);
+                                } else {
+                                    skin.paintSkin(g, x + OFFSET, y + icon.getIconHeight() / 2, state);
+                                }
                             } else {
-                                skin.paintSkin(g, x + OFFSET, y + icon.getIconHeight() / 2, state);
+                                if (icon == null) {
+                                    skin.paintSkin(g, x + 4 * OFFSET, y + OFFSET, state);
+                                } else {
+                                    int ycoord = (icon.getIconHeight() <= 16)
+                                                  ? y + OFFSET
+                                                  : (y + icon.getIconHeight() / 2);
+                                    if (icon.getIconWidth() <= 8) {
+                                        skin.paintSkin(g, x + OFFSET, ycoord, state);
+                                    } else if (icon.getIconWidth() <= 16) {
+                                        if (menuItem.getText().isEmpty()) {
+                                            skin.paintSkin(g,
+                                                (menuItem.getAccelerator() != null)
+                                                 ? (x + 2 * OFFSET) : (x + 3 * OFFSET),
+                                                ycoord, state);
+                                        } else {
+                                            skin.paintSkin(g,
+                                                (type == JRadioButtonMenuItem.class)
+                                                 ? (x + 4 * OFFSET) : (x + 3 * OFFSET),
+                                                ycoord, state);
+                                        }
+                                    } else {
+                                        if (menuItem.getText().isEmpty()
+                                            || menuItem.getAccelerator() != null) {
+                                            skin.paintSkin(g,
+                                                (type == JRadioButtonMenuItem.class)
+                                                 ? (x + 3 * OFFSET) : (x + 4 * OFFSET),
+                                                ycoord, state);
+                                        } else {
+                                            skin.paintSkin(g, x + 7 * OFFSET,
+                                                           ycoord, state);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
                 if (icon != null) {
-                    icon.paintIcon(c, g, x + VistaMenuItemCheckIconFactory.getIconWidth(),
-                                   y + OFFSET);
+                    if (WindowsGraphicsUtils.isLeftToRight(c)) {
+                        icon.paintIcon(c, g,
+                                       x + VistaMenuItemCheckIconFactory.getIconWidth(),
+                                       y + OFFSET);
+                    } else {
+                        icon.paintIcon(c, g,
+                                       x - VistaMenuItemCheckIconFactory.getIconWidth() + 2 * OFFSET,
+                                       y + OFFSET);
+                    }
                 }
             }
             private static WindowsMenuItemUIAccessor getAccessor(

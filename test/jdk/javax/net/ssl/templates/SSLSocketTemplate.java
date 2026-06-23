@@ -168,7 +168,7 @@ public class SSLSocketTemplate extends SSLContextTemplate {
     /*
      * What's the server address?  null means binding to the wildcard.
      */
-    protected volatile InetAddress serverAddress = null;
+    protected volatile InetAddress serverAddress = InetAddress.getLoopbackAddress();
 
     /*
      * Define the server side of the test.
@@ -177,13 +177,8 @@ public class SSLSocketTemplate extends SSLContextTemplate {
         // kick start the server side service
         SSLContext context = createServerSSLContext();
         SSLServerSocketFactory sslssf = context.getServerSocketFactory();
-        InetAddress serverAddress = this.serverAddress;
-        SSLServerSocket sslServerSocket = serverAddress == null ?
-                (SSLServerSocket)sslssf.createServerSocket(serverPort)
-                : (SSLServerSocket)sslssf.createServerSocket();
-        if (serverAddress != null) {
-            sslServerSocket.bind(new InetSocketAddress(serverAddress, serverPort));
-        }
+        SSLServerSocket sslServerSocket = (SSLServerSocket)sslssf.createServerSocket(
+                serverPort, 0, serverAddress);
         configureServerSocket(sslServerSocket);
         serverPort = sslServerSocket.getLocalPort();
 
@@ -195,6 +190,7 @@ public class SSLSocketTemplate extends SSLContextTemplate {
         try {
             sslServerSocket.setSoTimeout(30000);
             sslSocket = (SSLSocket)sslServerSocket.accept();
+            System.out.println("Connection established on port : " +serverPort);
         } catch (SocketTimeoutException ste) {
             // Ignore the test case if no connection within 30 seconds.
             System.out.println(
@@ -233,6 +229,7 @@ public class SSLSocketTemplate extends SSLContextTemplate {
             }
         } finally {
             sslSocket.close();
+            System.out.println("Connection closed on port : " +serverPort);
         }
     }
 
@@ -271,10 +268,8 @@ public class SSLSocketTemplate extends SSLContextTemplate {
         try (SSLSocket sslSocket = (SSLSocket)sslsf.createSocket()) {
             try {
                 configureClientSocket(sslSocket);
-                InetAddress serverAddress = this.serverAddress;
-                InetSocketAddress connectAddress = serverAddress == null
-                        ? new InetSocketAddress(InetAddress.getLoopbackAddress(), serverPort)
-                        : new InetSocketAddress(serverAddress, serverPort);
+                InetSocketAddress connectAddress = new InetSocketAddress(serverAddress,
+                        serverPort);
                 sslSocket.connect(connectAddress, 15000);
             } catch (IOException ioe) {
                 // The server side may be impacted by naughty test cases or

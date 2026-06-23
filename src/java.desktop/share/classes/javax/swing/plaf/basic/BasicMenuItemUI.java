@@ -681,7 +681,7 @@ public class BasicMenuItemUI extends MenuItemUI
         g.setFont(mi.getFont());
 
         Rectangle viewRect = new Rectangle(0, 0, mi.getWidth(), mi.getHeight());
-        applyInsets(viewRect, mi.getInsets());
+        SwingUtilities3.applyInsets(viewRect, mi.getInsets());
 
         MenuItemLayoutHelper lh = new MenuItemLayoutHelper(mi, checkIcon,
                 arrowIcon, viewRect, defaultTextIconGap, acceleratorDelimiter,
@@ -715,11 +715,10 @@ public class BasicMenuItemUI extends MenuItemUI
 
     private void paintAccText(Graphics g, MenuItemLayoutHelper lh,
                               MenuItemLayoutHelper.LayoutResult lr) {
-        SwingUtilities3.setDisabledForeground(disabledForeground);
-        SwingUtilities3.setAcceleratorSelectionForeground(
-                        acceleratorSelectionForeground);
-        SwingUtilities3.setAcceleratorForeground(acceleratorForeground);
-        SwingUtilities3.paintAccText(g, lh, lr);
+        SwingUtilities3.paintAccText(g, lh, lr,
+                                     disabledForeground,
+                                     acceleratorSelectionForeground,
+                                     acceleratorForeground);
     }
 
     private void paintText(Graphics g, MenuItemLayoutHelper lh,
@@ -739,10 +738,6 @@ public class BasicMenuItemUI extends MenuItemUI
                                 MenuItemLayoutHelper.LayoutResult lr,
                                 Color foreground) {
         SwingUtilities3.paintArrowIcon(g, lh, lr, foreground);
-    }
-
-    private void applyInsets(Rectangle rect, Insets insets) {
-        SwingUtilities3.applyInsets(rect, insets);
     }
 
     /**
@@ -1117,6 +1112,9 @@ public class BasicMenuItemUI extends MenuItemUI
                 // existed, and install a new one if the text installed
                 // into the JLabel is html source.
                 JMenuItem lbl = ((JMenuItem) e.getSource());
+                if (SwingUtilities2.isScaleChanged(e)) {
+                    MenuItemLayoutHelper.clearUsedParentClientProperties(lbl);
+                }
                 String text = lbl.getText();
                 BasicHTML.updateRenderer(lbl, text);
             } else if (name  == "iconTextGap") {
